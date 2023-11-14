@@ -64,6 +64,14 @@ public class BPTree<K extends Comparable<K>, V> {
 	 */
 	public V get(K key) {
 		// TODO ...
+		// check if nF.getNode works. if not, use create()
+		BPNode<K, V> leafToSearch = find(nodeFactory.getNode(rootNumber), key);
+		// should this be a binary search?
+		for (int i = 0; i < leafToSearch.keys.size(); i++) {
+			if (leafToSearch.getKey(i) == key) {
+				return leafToSearch.getValue(i);
+			}
+		}
 		return null;
 	}
 
@@ -79,10 +87,18 @@ public class BPTree<K extends Comparable<K>, V> {
 		if (node.isLeaf()) {
 			return node;
 		}
-
+		else {
 		// TODO ...
+		for (int i = 0; i < node.keys.size(); i++) {
+			// if it's less than the key at current position, 
+			// go to the child node pointed to before it
+			if (BPTree.less(key, node.getKey(i))) {
+				return find(nodeFactory.getNode(node.getChild(0)), key);
+			}
+		}
 		return null;
 	}
+}
 
 	/**
 	 * Helper method: returns true if k1 < k2.
