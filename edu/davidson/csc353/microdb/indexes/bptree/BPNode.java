@@ -172,6 +172,13 @@ public class BPNode<K extends Comparable<K>, V> {
 
 		// TODO ...
 
+		// set left = pointer to the left node in the split operation
+		// set right = pointer to the right node in the split operation
+		// set keyDivider = first key of the right node AFTER the split operation
+
+		// create a new node L'
+		// 
+
 		return result;
 	}
 
@@ -194,6 +201,16 @@ public class BPNode<K extends Comparable<K>, V> {
 		result.right = nodeFactory.create(false);
 
 		// TODO ...
+		// left = pointer to the left node in the split operation
+		// right = pointer to the right node in the split operation
+		// keyDivider = the key that will be subsequently inserted once again into the parent node, recursively
+		// the key inserted in the parent node will have its associated pointer referring to the right-side of the previously split node
+
+		// GENERAL NOTES FROM PDF FOR INSERT (PART 2)
+		// we're going to need to create new nodes for the root as we insert more K-V pairs
+		// any new node should be obtained from BPNodeFactory
+		// we can implement these pointer changes manually or with the help of insertChild()
+
 
 		return result;
 	}

@@ -34,9 +34,26 @@ public class BPTree<K extends Comparable<K>, V> {
 	public void insert(K key, V value) {
 		System.out.println("Inserting " + key);
 
+		// if tree is empty { create an empty leaf node L, which is also the root }
+		// else {...... the rest of this stuff should go in here 
+
 		BPNode<K,V> insertPlace = find(nodeFactory.getNode(rootNumber), key);
+		// if insertPlace has 2+ more spaces in keys array/values array (meaning it is NOT at the maximum capacity of keys)
+			// insert the key-value pair within this leaf
+		// else 
+			// insert the key-value pair as the last entry within this leaf (?)
+			// then call splitLeaf()
 
 		// TODO ...
+
+		// insertPlace = location to insert new key/value
+		// insertPlace = find(node, key)
+		// put (k, v) into insertPlace
+		// if the node insertPlace has overflown after inserting - which we know if we just filled the last entry in the .keys or .values arrays
+		// since the arrays contain one more entry than the maximum allowed (so we can add the key-value FIRST and THEN split the node)
+			// call splitLeaf()
+
+		// }
 		
 		// Need to call insertOnParent after performing a leaf node split
 	}
@@ -50,6 +67,8 @@ public class BPTree<K extends Comparable<K>, V> {
 	 */
 	private void insertOnParent(BPNode<K,V> left, K key, BPNode<K,V> right) {
 		// TODO ...
+		// call this if you split the node
+		// required to insert the first key of the right split into the parent node
 					
 		// Need to keep calling insertOnParent after performing an internal node split
 	}
