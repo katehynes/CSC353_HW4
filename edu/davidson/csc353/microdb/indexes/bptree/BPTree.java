@@ -11,7 +11,7 @@ import java.util.function.Function;
  * @param <V> type of the values associated with the keys in the B+Tree node.
  */
 public class BPTree<K extends Comparable<K>, V> {
-	private BPNodeFactory<K,V> nodeFactory;
+	private BPNodeFactory<K, V> nodeFactory;
 
 	private int rootNumber;
 
@@ -19,8 +19,8 @@ public class BPTree<K extends Comparable<K>, V> {
 		nodeFactory = new BPNodeFactory<>("test-index", loadKey, loadValue);
 
 		// The node will be garbage-collected, but retrievable from disk
-		BPNode<K,V> rootNode = nodeFactory.create(true);
-		//nodeFactory.save(rootNode);
+		BPNode<K, V> rootNode = nodeFactory.create(true);
+		// nodeFactory.save(rootNode);
 
 		rootNumber = rootNode.number;
 	}
@@ -28,29 +28,30 @@ public class BPTree<K extends Comparable<K>, V> {
 	/**
 	 * Inserts the key-value pair into the B+Tree.
 	 * 
-	 * @param key The key.
+	 * @param key   The key.
 	 * @param value The value associated with the key.
 	 */
 	public void insert(K key, V value) {
 		System.out.println("Inserting " + key);
 
-		BPNode<K,V> insertPlace = find(nodeFactory.getNode(rootNumber), key);
+		BPNode<K, V> insertPlace = find(nodeFactory.getNode(rootNumber), key);
 
 		// TODO ...
-		
+
 		// Need to call insertOnParent after performing a leaf node split
 	}
 
 	/**
 	 * Insert on parent node a divider key after a child has been splitted.
 	 * 
-	 * @param left Left B+Tree node after a split has been made.
-	 * @param key Divider key (according to the description in {@link SplitResult}.
+	 * @param left  Left B+Tree node after a split has been made.
+	 * @param key   Divider key (according to the description in
+	 *              {@link SplitResult}.
 	 * @param right Right B+Tree node after a split has been made.
 	 */
-	private void insertOnParent(BPNode<K,V> left, K key, BPNode<K,V> right) {
+	private void insertOnParent(BPNode<K, V> left, K key, BPNode<K, V> right) {
 		// TODO ...
-					
+
 		// Need to keep calling insertOnParent after performing an internal node split
 	}
 
@@ -70,12 +71,12 @@ public class BPTree<K extends Comparable<K>, V> {
 	 * Returns the leaf node where we should look for the provided key.
 	 * 
 	 * @param node The current node in the recursive search procedure.
-	 * @param key The key being searched.
+	 * @param key  The key being searched.
 	 * 
 	 * @return The leaf node where we should look for the provided key.
 	 */
-	private BPNode<K,V> find(BPNode<K,V> node, K key) {
-		if(node.isLeaf()) {
+	private BPNode<K, V> find(BPNode<K, V> node, K key) {
+		if (node.isLeaf()) {
 			return node;
 		}
 
@@ -165,10 +166,14 @@ public class BPTree<K extends Comparable<K>, V> {
 		newNode1.load(buffer1, k -> k, s -> Integer.parseInt(s));
 		newNode2.load(buffer2, k -> k, s -> Integer.parseInt(s));
 
-		System.out.println("Original root: " + node1 + ", parent = " + node1.parent + ", next = " + node1.next + ", number = " + newNode1.number);
-		System.out.println("Loaded root:   " + newNode1 + ", parent = " + newNode1.parent + ", next = " + newNode1.next + ", number = " + newNode1.number);
+		System.out.println("Original root: " + node1 + ", parent = " + node1.parent + ", next = " + node1.next
+				+ ", number = " + newNode1.number);
+		System.out.println("Loaded root:   " + newNode1 + ", parent = " + newNode1.parent + ", next = " + newNode1.next
+				+ ", number = " + newNode1.number);
 
-		System.out.println("Original leaf: " + node2 + ", parent = " + node2.parent + ", next = " + node2.next + ", number = " + newNode2.number);
-		System.out.println("Loaded leaf:   " + newNode2 + ", parent = " + newNode2.parent + ", next = " + newNode2.next + ", number = " + newNode2.number);
+		System.out.println("Original leaf: " + node2 + ", parent = " + node2.parent + ", next = " + node2.next
+				+ ", number = " + newNode2.number);
+		System.out.println("Loaded leaf:   " + newNode2 + ", parent = " + newNode2.parent + ", next = " + newNode2.next
+				+ ", number = " + newNode2.number);
 	}
 }
