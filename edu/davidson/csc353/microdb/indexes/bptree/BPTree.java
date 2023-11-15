@@ -39,10 +39,26 @@ public class BPTree<K extends Comparable<K>, V> {
 
 		BPNode<K,V> insertPlace = find(nodeFactory.getNode(rootNumber), key);
 		// if insertPlace has 2+ more spaces in keys array/values array (meaning it is NOT at the maximum capacity of keys)
-			// insert the key-value pair within this leaf
+		// add new key
+		// for (int i = 0; i < insertPlace.keys.size() + 1; i++) 
+				// if (key < insertPlace.getKey(i))
+					// make sure this shifts things to the right
+					// insertPlace.keys.add(i, key)
+					// break; - don't continue with the for loop
+				// after for loop ends!
+				// else if (i == insertPlace.keys.size())
+					// insertPlace.keys.add(key)				
 		// else 
-			// insert the key-value pair as the last entry within this leaf (?)
-			// then call splitLeaf()
+			// if it's an internal node ... or is this something we do elsewhere???
+				// splitInternal() -> 
+					// SplitResult result = insertPlace.splitInternal(nodeFactory);
+					// result.dividerKey = 
+				// insertOnParent()
+			// else (it's a leaf node)
+				// splitLeaf()
+					// insert the key-value pair as the last entry within this leaf (?)
+					// don't need to call insertOnParent I guess?
+					// SplitResult result = splitLeaf()
 
 		// TODO ...
 
