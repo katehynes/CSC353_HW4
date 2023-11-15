@@ -172,14 +172,22 @@ public class BPNode<K extends Comparable<K>, V> {
 
 		// TODO ...
 
-		// set left = pointer to the left node in the split operation
-		// set right = pointer to the right node in the split operation
-		// set keyDivider = first key of the right node AFTER the split operation
+		int SPLIT_INDEX = SIZE / 2;
 
-		// create a new node L'
-		// 
+		result.dividerKey = result.left.getKey(SPLIT_INDEX);
+		
+		result.right.keys.add(result.left.getKey(SPLIT_INDEX));
+		result.right.keys.add(result.left.getKey(SPLIT_INDEX + 1));
+		result.right.keys.add(result.left.getKey(SPLIT_INDEX + 2));
+		result.left.keys.remove(result.left.getKey(SPLIT_INDEX));
+		result.left.keys.remove(result.left.getKey(SPLIT_INDEX + 1));
+		result.right.keys.remove(result.left.getKey(SPLIT_INDEX + 2));
 
-		return result;
+
+		// most common problem – every time you create a root, make sure you update a root!!
+		// step 1 - manually put a child number for its own node
+		// then insertChild does step 3 (adds key & other child)
+		// but must update parent of the old node
 	}
 
 	/**
@@ -199,6 +207,15 @@ public class BPNode<K extends Comparable<K>, V> {
 
 		result.left = this;
 		result.right = nodeFactory.create(false);
+		// might need to add a formula or something to use division results, instead of hard coding :()
+		result.dividerKey = result.left.getKey(2);
+		
+		result.right.keys.add(result.left.getKey(3));
+		result.right.keys.add(result.left.getKey(4));
+		result.left.keys.remove(result.left.getKey(3));
+		result.right.keys.remove(result.left.getKey(4));
+
+		
 
 		// TODO ...
 		// left = pointer to the left node in the split operation
@@ -211,6 +228,16 @@ public class BPNode<K extends Comparable<K>, V> {
 		// any new node should be obtained from BPNodeFactory
 		// we can implement these pointer changes manually or with the help of insertChild()
 
+
+		// create a new node
+		// split node in half (assuming 5 keys!)
+		// take the last 2 keys and move them to the other side
+		// take the last key (key #3 that was left behind) and take it out
+		// 
+		// check if there's a parent. if not, add parent
+		// manually add child
+		// for leaf nodes, BRING DOWN the divider key – everything needs to be present in the leaf nodes
+		// for internal nodes, when you bump up the divider key, you don't need to bring it down
 
 		return result;
 	}
