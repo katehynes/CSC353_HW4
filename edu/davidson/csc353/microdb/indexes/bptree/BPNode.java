@@ -173,15 +173,17 @@ public class BPNode<K extends Comparable<K>, V> {
 		// TODO ...
 
 		int SPLIT_INDEX = SIZE / 2;
-
 		result.dividerKey = result.left.getKey(SPLIT_INDEX);
-		
-		result.right.keys.add(result.left.getKey(SPLIT_INDEX));
-		result.right.keys.add(result.left.getKey(SPLIT_INDEX + 1));
-		result.right.keys.add(result.left.getKey(SPLIT_INDEX + 2));
-		result.left.keys.remove(result.left.getKey(SPLIT_INDEX));
-		result.left.keys.remove(result.left.getKey(SPLIT_INDEX + 1));
-		result.right.keys.remove(result.left.getKey(SPLIT_INDEX + 2));
+		for (int i = SPLIT_INDEX; i < SIZE; i++) {
+			result.right.insertValue(result.left.getKey(i), result.left.getValue(i));
+			//result.right.keys.add(result.left.getKey(i));
+		}
+		// go backwards and remove them after copying
+		for (int i = SIZE - 1; i >= SPLIT_INDEX; i--) {
+			result.left.keys.remove(result.left.getKey(i));
+		}
+
+		return result;
 
 
 		// most common problem – every time you create a root, make sure you update a root!!
@@ -208,12 +210,18 @@ public class BPNode<K extends Comparable<K>, V> {
 		result.left = this;
 		result.right = nodeFactory.create(false);
 		// might need to add a formula or something to use division results, instead of hard coding :()
-		result.dividerKey = result.left.getKey(2);
+		int SPLIT_INDEX = SIZE / 2;
+		result.dividerKey = result.left.getKey(SPLIT_INDEX);
 		
-		result.right.keys.add(result.left.getKey(3));
-		result.right.keys.add(result.left.getKey(4));
-		result.left.keys.remove(result.left.getKey(3));
-		result.right.keys.remove(result.left.getKey(4));
+		for (int i = SPLIT_INDEX + 1; i < SIZE; i++) {
+			result.right.keys.add(result.left.getKey(i));
+		}
+		// go backwards and remove them after copying
+		for (int i = SIZE; i >= SPLIT_INDEX; i++) {
+			result.left.keys.remove(result.left.getKey(i));
+		}
+
+		return result;
 
 		
 
@@ -238,8 +246,6 @@ public class BPNode<K extends Comparable<K>, V> {
 		// manually add child
 		// for leaf nodes, BRING DOWN the divider key – everything needs to be present in the leaf nodes
 		// for internal nodes, when you bump up the divider key, you don't need to bring it down
-
-		return result;
 	}
 
 	/**
