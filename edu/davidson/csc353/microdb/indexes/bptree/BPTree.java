@@ -34,15 +34,79 @@ public class BPTree<K extends Comparable<K>, V> {
 	public void insert(K key, V value) {
 		System.out.println("Inserting " + key);
 
+
+		/*
+		 * for leaf nodes
+		 * add your new key
+		 * if # keys == size + 1 (we're overflowing!)
+		 * - call splitLeaf, which we know by checking the flag of if its a leaf or not
+		 * splitLeaf:
+		 * -get BP node fac to create a new node, and ask for its number
+		 * -then divide size of keys by 2. put last half of them in the other side (including divider key)
+		 * -then also move the corresponding values over!
+		 * -then get the 1st key of the new node & set it as the divider key
+		 * go back into insert() ~~
+		 * now we have 2 nodes & a divKey
+		 * check to see if old node has a parent. if not, create new node with BPfactory, and set old node's parent to be that new node 
+		 * and set its left? pointer to the number of the first key in the old node
+		 * then do insertChild
+		 * if have parent, just do insertChild()
+		 * if this parent overflows, you need to ask if it overflows. if it overflows, call splitInternal()... repeat...
+		 * put number of the node as the next field
+		 * old.next = new.number
+		 */
+		
+		
+
+
 		// if tree is empty { create an empty leaf node L, which is also the root }
 		// else {...... the rest of this stuff should go in here 
 
 		BPNode<K,V> insertPlace = find(nodeFactory.getNode(rootNumber), key);
-		// if insertPlace has 2+ more spaces in keys array/values array (meaning it is NOT at the maximum capacity of keys)
-			// insert the key-value pair within this leaf
-		// else 
-			// insert the key-value pair as the last entry within this leaf (?)
-			// then call splitLeaf()
+		for (int i = 0; i < insertPlace.keys.size() + 1; i++) { // adding new key (no split)
+			if (BPTree.less(key, insertPlace.getKey(i))) {
+				// make sure this shifts things to the right*****
+				insertPlace.keys.add(i, key);
+				break; // don't continue with the for loop
+			}
+			else if (i == insertPlace.keys.size()) {
+				insertPlace.keys.add(key);
+			}
+		}				
+		if (insertPlace.keys.size() == BPNode.SIZE) { //the case where we need split
+			// if it's a leaf
+			if (insertPlace.leaf) {
+				SplitResult<K, V> result = insertPlace.splitLeaf(nodeFactory);
+				BPNode<K, V> parent;
+				if(insertPlace.parent == -1) { // if there is no parent
+					parent = nodeFactory.create(false);
+					insertPlace.parent = parent.number;
+					parent.children.add(insertPlace.number);
+					parent.insertChild(result.dividerKey, result.right.number, nodeFactory);
+				}
+				else { // if there is a parent (we need to add the child first key into the parent key list with a pointer pointing to the new node)
+					parent = nodeFactory.getNode(insertPlace.parent);
+				}
+				parent.insertChild(result.dividerKey, result.right.number, nodeFactory);
+				// check if parent has overflown
+				if (parent.keys.size() == BPNode.SIZE) {
+					parent.splitInternal(nodeFactory);
+				}
+				insertPlace.next = result.right.number;
+			}
+			// what if it's not a leaf??
+		} 
+
+			// if it's an internal node ... or is this something we do elsewhere???
+				// splitInternal() -> 
+					// SplitResult result = insertPlace.splitInternal(nodeFactory);
+					// result.dividerKey = 
+				// insertOnParent()
+			// else (it's a leaf node)
+				// splitLeaf()
+					// insert the key-value pair as the last entry within this leaf (?)
+					// don't need to call insertOnParent I guess?
+					// SplitResult result = splitLeaf()
 
 		// TODO ...
 
