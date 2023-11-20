@@ -217,7 +217,7 @@ public class BPNode<K extends Comparable<K>, V> {
 			result.right.keys.add(result.left.getKey(i));
 		}
 		// go backwards and remove them after copying
-		for (int i = SIZE; i >= SPLIT_INDEX; i++) {
+		for (int i = SIZE - 1; i >= SPLIT_INDEX; i--) {
 			result.left.keys.remove(result.left.getKey(i));
 		}
 

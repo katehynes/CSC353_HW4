@@ -206,10 +206,10 @@ public class BPTree<K extends Comparable<K>, V> {
 			// if it's less than the key at current position, 
 			// go to the child node pointed to before it
 			if (BPTree.less(key, node.getKey(i))) {
-				return find(nodeFactory.getNode(node.getChild(0)), key);
+				return find(nodeFactory.getNode(node.getChild(i)), key);
 			}
 			else if (i == node.keys.size() - 1) {
-				return find(nodeFactory.getNode(node.getChild(0)), key);
+				return find(nodeFactory.getNode(node.getChild(i + 1)), key);
 			}
 		}
 		return null;
