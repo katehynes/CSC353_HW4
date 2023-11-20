@@ -24,8 +24,8 @@ public class BPNode<K extends Comparable<K>, V> {
 	public int parent;
 
 	// Keys:
-	// -  in the leaf node, they are the associated with values
-	// -  in internal nodes, they separate the pointers to the children
+	// - in the leaf node, they are the associated with values
+	// - in internal nodes, they separate the pointers to the children
 	public ArrayList<K> keys;
 
 	// (Leaf node only) Values associated with each key
@@ -34,7 +34,7 @@ public class BPNode<K extends Comparable<K>, V> {
 	public int next;
 
 	// (Internal node only) Children of the internal node
-	public ArrayList<Integer> children; 
+	public ArrayList<Integer> children;
 
 	// Node number
 	public int number;
@@ -42,7 +42,8 @@ public class BPNode<K extends Comparable<K>, V> {
 	/**
 	 * Constructor.
 	 * 
-	 * @param leaf Flag indicating whether the node is a leaf (true) or internal node (false)
+	 * @param leaf Flag indicating whether the node is a leaf (true) or internal
+	 *             node (false)
 	 */
 	public BPNode(boolean leaf) {
 		this.leaf = leaf;
@@ -105,16 +106,17 @@ public class BPNode<K extends Comparable<K>, V> {
 	}
 
 	/**
-	 * (Leaf node only) Inserts a (K,P) pair in the appropriate position in the node.
+	 * (Leaf node only) Inserts a (K,P) pair in the appropriate position in the
+	 * node.
 	 * 
-	 * @param key The key.
+	 * @param key   The key.
 	 * @param value The value associated with the key.
 	 */
 	public void insertValue(K key, V value) {
 		int i;
 
-		for(i = 0; i < keys.size(); i++) {
-			if(BPTree.more(keys.get(i), key)) {
+		for (i = 0; i < keys.size(); i++) {
+			if (BPTree.more(keys.get(i), key)) {
 				break;
 			}
 		}
@@ -123,21 +125,23 @@ public class BPNode<K extends Comparable<K>, V> {
 		values.add(i, value);
 	}
 
-	/** 
-	 * (Internal node only) Inserts a (K,P) pair in the appropriate position in the node.
+	/**
+	 * (Internal node only) Inserts a (K,P) pair in the appropriate position in the
+	 * node.
 	 * 
-	 * NOTE: The pointer associated with key at position i is actually located at position i+1
-	 *       due to the first pointer.
+	 * NOTE: The pointer associated with key at position i is actually located at
+	 * position i+1
+	 * due to the first pointer.
 	 * 
-	 * @param key The key.
-	 * @param value The child node reference that should FOLLOW the key.
+	 * @param key         The key.
+	 * @param value       The child node reference that should FOLLOW the key.
 	 * @param nodeFactory Factory that generates new nodes.
 	 */
-	public void insertChild(K key, int childNumber, BPNodeFactory<K,V> nodeFactory) {
+	public void insertChild(K key, int childNumber, BPNodeFactory<K, V> nodeFactory) {
 		int i;
 
-		for(i = 0; i < keys.size(); i++) {
-			if(BPTree.more(keys.get(i), key)) {
+		for (i = 0; i < keys.size(); i++) {
+			if (BPTree.more(keys.get(i), key)) {
 				break;
 			}
 		}
@@ -145,27 +149,29 @@ public class BPNode<K extends Comparable<K>, V> {
 		keys.add(i, key);
 		children.add(i + 1, childNumber);
 
-		BPNode<K,V> child = nodeFactory.getNode(childNumber);
-		
+		BPNode<K, V> child = nodeFactory.getNode(childNumber);
+
 		child.parent = this.number;
-		//nodeFactory.save(child);
+		// nodeFactory.save(child);
 	}
 
 	/**
 	 * Splits an overflowed leaf node into a {@link SplitResult} object,
 	 * that contains:
-	 * 	- A reference to the left B+Tree node;
-	 * 	- A reference to the right B+Tree node;
-	 * 	- The first key in the right B+Tree node (the "divider Key" in the {@link SplitResult} object).
+	 * - A reference to the left B+Tree node;
+	 * - A reference to the right B+Tree node;
+	 * - The first key in the right B+Tree node (the "divider Key" in the
+	 * {@link SplitResult} object).
 	 * 
-	 * The method also makes the left node point to the right node in the "next" attribute.
+	 * The method also makes the left node point to the right node in the "next"
+	 * attribute.
 	 * 
 	 * @param nodeFactory Factory that generates new nodes.
 	 * 
 	 * @return A new {@link SplitResult} following the specifications above.
 	 */
-	public SplitResult<K,V> splitLeaf(BPNodeFactory<K,V> nodeFactory) {
-		SplitResult<K,V> result = new SplitResult<>();
+	public SplitResult<K, V> splitLeaf(BPNodeFactory<K, V> nodeFactory) {
+		SplitResult<K, V> result = new SplitResult<>();
 
 		result.left = this;
 		result.right = nodeFactory.create(true);
@@ -175,7 +181,7 @@ public class BPNode<K extends Comparable<K>, V> {
 		int SPLIT_INDEX = SIZE / 2;
 
 		result.dividerKey = result.left.getKey(SPLIT_INDEX);
-		
+
 		result.right.keys.add(result.left.getKey(SPLIT_INDEX));
 		result.right.keys.add(result.left.getKey(SPLIT_INDEX + 1));
 		result.right.keys.add(result.left.getKey(SPLIT_INDEX + 2));
@@ -184,60 +190,66 @@ public class BPNode<K extends Comparable<K>, V> {
 		result.right.keys.remove(result.left.getKey(SPLIT_INDEX + 2));
 
 
-		// most common problem – every time you create a root, make sure you update a root!!
+		// most common problem – every time you create a root, make sure you update a
+		// root!!
 		// step 1 - manually put a child number for its own node
 		// then insertChild does step 3 (adds key & other child)
 		// but must update parent of the old node
+		return result.dividerKey;
 	}
 
 	/**
 	 * Splits an overflowed leaf internal into a {@link SplitResult} object,
 	 * that contains:
-	 * 	- A reference to the left B+Tree node;
-	 * 	- A reference to the right B+Tree node;
-	 * 	- The divider key that will be subsequently be inserted in the parent node
-	 *    (stored in the "divider Key" in the {@link SplitResult} object).
-	 *    
+	 * - A reference to the left B+Tree node;
+	 * - A reference to the right B+Tree node;
+	 * - The divider key that will be subsequently be inserted in the parent node
+	 * (stored in the "divider Key" in the {@link SplitResult} object).
+	 * 
 	 * @param nodeFactory Factory that generates new nodes.
 	 * 
 	 * @return A new {@link SplitResult} following the specifications above.
 	 */
-	public SplitResult<K, V> splitInternal(BPNodeFactory<K,V> nodeFactory) {
-		SplitResult<K,V> result = new SplitResult<>();
+	public SplitResult<K, V> splitInternal(BPNodeFactory<K, V> nodeFactory) {
+		SplitResult<K, V> result = new SplitResult<>();
 
 		result.left = this;
 		result.right = nodeFactory.create(false);
-		// might need to add a formula or something to use division results, instead of hard coding :()
+		// might need to add a formula or something to use division results, instead of
+		// hard coding :()
 		result.dividerKey = result.left.getKey(2);
-		
+
 		result.right.keys.add(result.left.getKey(3));
 		result.right.keys.add(result.left.getKey(4));
 		result.left.keys.remove(result.left.getKey(3));
 		result.right.keys.remove(result.left.getKey(4));
 
-		
-
 		// TODO ...
 		// left = pointer to the left node in the split operation
 		// right = pointer to the right node in the split operation
-		// keyDivider = the key that will be subsequently inserted once again into the parent node, recursively
-		// the key inserted in the parent node will have its associated pointer referring to the right-side of the previously split node
+		// keyDivider = the key that will be subsequently inserted once again into the
+		// parent node, recursively
+		// the key inserted in the parent node will have its associated pointer
+		// referring to the right-side of the previously split node
 
 		// GENERAL NOTES FROM PDF FOR INSERT (PART 2)
-		// we're going to need to create new nodes for the root as we insert more K-V pairs
+		// we're going to need to create new nodes for the root as we insert more K-V
+		// pairs
 		// any new node should be obtained from BPNodeFactory
-		// we can implement these pointer changes manually or with the help of insertChild()
-
+		// we can implement these pointer changes manually or with the help of
+		// insertChild()
 
 		// create a new node
 		// split node in half (assuming 5 keys!)
 		// take the last 2 keys and move them to the other side
 		// take the last key (key #3 that was left behind) and take it out
-		// 
+		//
 		// check if there's a parent. if not, add parent
 		// manually add child
-		// for leaf nodes, BRING DOWN the divider key – everything needs to be present in the leaf nodes
-		// for internal nodes, when you bump up the divider key, you don't need to bring it down
+		// for leaf nodes, BRING DOWN the divider key – everything needs to be present
+		// in the leaf nodes
+		// for internal nodes, when you bump up the divider key, you don't need to bring
+		// it down
 
 		return result;
 	}
@@ -249,15 +261,15 @@ public class BPNode<K extends Comparable<K>, V> {
 		String result = "[(#: " + number + ") ";
 
 		// If leaf, print [k1 v1 k2 v2 ... kn vn]
-		if(isLeaf()) {
-			for(int i = 0; i < keys.size() - 1; i++) {
+		if (isLeaf()) {
+			for (int i = 0; i < keys.size() - 1; i++) {
 				result += keys.get(i);
 				result += " ";
 				result += values.get(i);
 				result += " ";
 			}
 
-			if(keys.size() > 0) {
+			if (keys.size() > 0) {
 				result += keys.get(keys.size() - 1);
 				result += " ";
 				result += values.get(keys.size() - 1);
@@ -265,14 +277,14 @@ public class BPNode<K extends Comparable<K>, V> {
 		}
 		// If internal, print [<c0> k1 <c1> k2 <c2> ... kn <cn>], where
 		else {
-			for(int i = 0; i < keys.size(); i++) {
+			for (int i = 0; i < keys.size(); i++) {
 				result += "<" + children.get(i) + ">";
 				result += " ";
 				result += keys.get(i);
 				result += " ";
 			}
 
-			if(keys.size() > 0) {
+			if (keys.size() > 0) {
 				result += "<" + children.get(keys.size()) + ">";
 			}
 		}
@@ -286,15 +298,18 @@ public class BPNode<K extends Comparable<K>, V> {
 	 * Loads information from a buffer of 512 bytes (loaded from disk)
 	 * into the memory representation of a B+Tree node.
 	 * 
-	 * @param buffer A byte buffer of 512 bytes containing the node representation from disk.
-	 * @param loadKey A function that converts string representations into keys of type K
-	 * @param loadValue A function that converts string representations into values of type V
+	 * @param buffer    A byte buffer of 512 bytes containing the node
+	 *                  representation from disk.
+	 * @param loadKey   A function that converts string representations into keys of
+	 *                  type K
+	 * @param loadValue A function that converts string representations into values
+	 *                  of type V
 	 */
 	public void load(ByteBuffer buffer, Function<String, K> loadKey, Function<String, V> loadValue) {
 		buffer.rewind();
 
 		// TODO: Load from disk (that is, from the buffer), create your own file format
-		//       The getInt() and putInt() functions should be very helpful
+		// The getInt() and putInt() functions should be very helpful
 	}
 
 	/**
@@ -307,7 +322,8 @@ public class BPNode<K extends Comparable<K>, V> {
 		buffer.rewind();
 
 		// TODO: Save to disk (that is, to the buffer), create your own file format
-		//       The getInt() and putInt() functions should be very helpful
-		//       To save a string, generate it in memory, then use getBytes() and use the put() function in the buffer.
+		// The getInt() and putInt() functions should be very helpful
+		// To save a string, generate it in memory, then use getBytes() and use the
+		// put() function in the buffer.
 	}
 }
