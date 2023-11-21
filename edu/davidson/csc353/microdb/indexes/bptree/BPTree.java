@@ -20,8 +20,6 @@ public class BPTree<K extends Comparable<K>, V> {
 
 		// The node will be garbage-collected, but retrievable from disk
 		BPNode<K, V> rootNode = nodeFactory.create(true);
-		// nodeFactory.save(rootNode);
-
 		rootNumber = rootNode.number;
 	}
 
@@ -34,91 +32,16 @@ public class BPTree<K extends Comparable<K>, V> {
 	public void insert(K key, V value) {
 		System.out.println("Inserting " + key);
 
+		BPNode<K, V> insertPlace = find(nodeFactory.getNode(rootNumber), key);
 
-		/*
-		 * for leaf nodes
-		 * add your new key
-		 * if # keys == size + 1 (we're overflowing!)
-		 * - call splitLeaf, which we know by checking the flag of if its a leaf or not
-		 * splitLeaf:
-		 * -get BP node fac to create a new node, and ask for its number
-		 * -then divide size of keys by 2. put last half of them in the other side (including divider key)
-		 * -then also move the corresponding values over!
-		 * -then get the 1st key of the new node & set it as the divider key
-		 * go back into insert() ~~
-		 * now we have 2 nodes & a divKey
-		 * check to see if old node has a parent. if not, create new node with BPfactory, and set old node's parent to be that new node 
-		 * and set its left? pointer to the number of the first key in the old node
-		 * then do insertChild
-		 * if have parent, just do insertChild()
-		 * if this parent overflows, you need to ask if it overflows. if it overflows, call splitInternal()... repeat...
-		 * put number of the node as the next field
-		 * old.next = new.number
-		 */
-		
-		
-
-
-		// if tree is empty { create an empty leaf node L, which is also the root }
-		// else {...... the rest of this stuff should go in here 
-
-		BPNode<K,V> insertPlace = find(nodeFactory.getNode(rootNumber), key);
-		// for (int i = 0; i < insertPlace.keys.size() + 1; i++) { // adding new key (no split)
-		// 	if (BPTree.less(key, insertPlace.getKey(i))) {
-		// 		// make sure this shifts things to the right*****
-		// 		insertPlace.keys.add(key);
-		// 		break; // don't continue with the for loop
-		// 	}
 		insertPlace.insertValue(key, value);
-
-			// check if size = size -> split
-			// call splitLeaf() 
-				// get split result
-			// call insertOnParent
-				//Base case - no parent:
-				// insertOnParent finds parent, put divider here, then point to new node
-				// insertOnParent – checks if there's a parent. creates parent if not
-				// add a child to the first node, add a child for the right node
-				// update root
-				// update its parent
-				// if there is a parent, then ust add a child for the right node
-				// check if size of keys == SIZE. if so, then call recursively - split internal
-				
-			// triggers the recursive insertOnParent
-							
-		if (insertPlace.keys.size() == BPNode.SIZE){ //the case where we need split
-			// if it's a leaf
+		// overflow in leadnode, split
+		if (insertPlace.keys.size() == BPNode.SIZE) {
 			SplitResult<K, V> result = insertPlace.splitLeaf(nodeFactory);
 			insertOnParent(result.left, result.dividerKey, result.right);
-			// BPNode<K, V> parent;
 			insertPlace.next = result.right.number;
-			
-			// what if it's not a leaf??
-		} 
 
-			// if it's an internal node ... or is this something we do elsewhere???
-				// splitInternal() -> 
-					// SplitResult result = insertPlace.splitInternal(nodeFactory);
-					// result.dividerKey = 
-				// insertOnParent()
-			// else (it's a leaf node)
-				// splitLeaf()
-					// insert the key-value pair as the last entry within this leaf (?)
-					// don't need to call insertOnParent I guess?
-					// SplitResult result = splitLeaf()
-
-		// TODO ...
-
-		// insertPlace = location to insert new key/value
-		// insertPlace = find(node, key)
-		// put (k, v) into insertPlace
-		// if the node insertPlace has overflown after inserting - which we know if we just filled the last entry in the .keys or .values arrays
-		// since the arrays contain one more entry than the maximum allowed (so we can add the key-value FIRST and THEN split the node)
-			// call splitLeaf()
-
-		// }
-		
-		// Need to call insertOnParent after performing a leaf node split
+		}
 	}
 
 	/**
@@ -129,43 +52,28 @@ public class BPTree<K extends Comparable<K>, V> {
 	 *              {@link SplitResult}.
 	 * @param right Right B+Tree node after a split has been made.
 	 */
-	private void insertOnParent(BPNode<K,V> left, K key, BPNode<K,V> right) {
-		// call insertOnParent
-				//Base case - no parent:
-				// insertOnParent finds parent, put divider here, then point to new node
-				// insertOnParent – checks if there's a parent. creates parent if not
-				// add a child to the first node, add a child for the right node
-				// update root
-				// update its parent
-				// if there is a parent, then just add a child for the right node
-				// check if size of keys == SIZE. if so, then call recursively - split internal
+	private void insertOnParent(BPNode<K, V> left, K key, BPNode<K, V> right) {
+
 		BPNode<K, V> parent;
-		if(left.parent == -1) { // if there is no parent
+		// no parent node
+		if (left.parent == -1) {
 			parent = nodeFactory.create(false);
 			rootNumber = parent.number;
-			// parent.insertChild(key, left.number, nodeFactory);
 			parent.children.add(left.number);
 			left.parent = parent.number;
 		}
-		else { // if there is a parent (we need to add the child first key into the parent key list with a pointer pointing to the new node)
+		// parent exists
+		else {
 			parent = nodeFactory.getNode(left.parent);
 		}
 		parent.insertChild(key, right.number, nodeFactory);
 		left.next = right.number;
-		// check if parent overflows
+		// check if parent overflows (if it does, recurse)
 		if (parent.keys.size() == BPNode.SIZE) {
 			SplitResult<K, V> recurse = parent.splitInternal(nodeFactory);
-			insertOnParent(recurse.left,  recurse.dividerKey, recurse.right);
+			recurse.left.next = recurse.right.number;
+			insertOnParent(recurse.left, recurse.dividerKey, recurse.right);
 		}
-
-		// call this if you split the node
-		// required to insert the first key of the right split into the parent node
-					
-		// Need to keep calling insertOnParent after performing an internal node split
-		// if left node has an existing parent:
-			// add divider key to the parent arraylist
-		// if not:
-			// create a parent and 
 
 	}
 
@@ -177,10 +85,7 @@ public class BPTree<K extends Comparable<K>, V> {
 	 * @return The value associated with the provided key.
 	 */
 	public V get(K key) {
-		// TODO ...
-		// check if nF.getNode works. if not, use create()
 		BPNode<K, V> leafToSearch = find(nodeFactory.getNode(rootNumber), key);
-		// should this be a binary search?
 		for (int i = 0; i < leafToSearch.keys.size(); i++) {
 			if (leafToSearch.getKey(i) == key) {
 				return leafToSearch.getValue(i);
@@ -200,22 +105,19 @@ public class BPTree<K extends Comparable<K>, V> {
 	private BPNode<K, V> find(BPNode<K, V> node, K key) {
 		if (node.isLeaf()) {
 			return node;
-		}
-		else {
-		// TODO ...
-		for (int i = 0; i < node.keys.size(); i++) {
-			// if it's less than the key at current position, 
-			// go to the child node pointed to before it
-			if (BPTree.less(key, node.getKey(i))) {
-				return find(nodeFactory.getNode(node.getChild(i)), key);
+		} else {
+			for (int i = 0; i < node.keys.size(); i++) {
+				// if it's less than the key at current position,
+				// go to the child node pointed to before it
+				if (BPTree.less(key, node.getKey(i))) {
+					return find(nodeFactory.getNode(node.getChild(i)), key);
+				} else if (i == node.keys.size() - 1) {
+					return find(nodeFactory.getNode(node.getChild(i + 1)), key);
+				}
 			}
-			else if (i == node.keys.size() - 1) {
-				return find(nodeFactory.getNode(node.getChild(i + 1)), key);
-			}
+			return null;
 		}
-		return null;
 	}
-}
 
 	/**
 	 * Helper method: returns true if k1 < k2.

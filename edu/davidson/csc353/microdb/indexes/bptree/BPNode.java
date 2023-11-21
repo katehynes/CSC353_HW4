@@ -152,7 +152,6 @@ public class BPNode<K extends Comparable<K>, V> {
 		BPNode<K, V> child = nodeFactory.getNode(childNumber);
 
 		child.parent = this.number;
-		// nodeFactory.save(child);
 	}
 
 	/**
@@ -176,13 +175,10 @@ public class BPNode<K extends Comparable<K>, V> {
 		result.left = this;
 		result.right = nodeFactory.create(true);
 
-		// TODO ...
-
 		int SPLIT_INDEX = SIZE / 2;
 		result.dividerKey = result.left.getKey(SPLIT_INDEX);
 		for (int i = SPLIT_INDEX; i < SIZE; i++) {
 			result.right.insertValue(result.left.getKey(i), result.left.getValue(i));
-			//result.right.keys.add(result.left.getKey(i));
 		}
 		// go backwards and remove them after copying
 		for (int i = SIZE - 1; i >= SPLIT_INDEX; i--) {
@@ -190,14 +186,6 @@ public class BPNode<K extends Comparable<K>, V> {
 		}
 
 		return result;
-
-
-		// most common problem – every time you create a root, make sure you update a
-		// root!!
-		// step 1 - manually put a child number for its own node
-		// then insertChild does step 3 (adds key & other child)
-		// but must update parent of the old node
-		return result.dividerKey;
 	}
 
 	/**
@@ -217,12 +205,16 @@ public class BPNode<K extends Comparable<K>, V> {
 
 		result.left = this;
 		result.right = nodeFactory.create(false);
-		// might need to add a formula or something to use division results, instead of hard coding :()
+
 		int SPLIT_INDEX = SIZE / 2;
 		result.dividerKey = result.left.getKey(SPLIT_INDEX);
-		
+		// add keys
 		for (int i = SPLIT_INDEX + 1; i < SIZE; i++) {
 			result.right.keys.add(result.left.getKey(i));
+		}
+		// add children
+		for (int i = SPLIT_INDEX + 1; i <= SIZE; i++) {
+			result.right.children.add(result.left.children.get(i));
 		}
 		// go backwards and remove them after copying
 		for (int i = SIZE - 1; i >= SPLIT_INDEX; i--) {
@@ -231,30 +223,6 @@ public class BPNode<K extends Comparable<K>, V> {
 
 		return result;
 
-		// TODO ...
-		// left = pointer to the left node in the split operation
-		// right = pointer to the right node in the split operation
-		// keyDivider = the key that will be subsequently inserted once again into the
-		// parent node, recursively
-		// the key inserted in the parent node will have its associated pointer
-		// referring to the right-side of the previously split node
-
-		// GENERAL NOTES FROM PDF FOR INSERT (PART 2)
-		// we're going to need to create new nodes for the root as we insert more K-V
-		// pairs
-		// any new node should be obtained from BPNodeFactory
-		// we can implement these pointer changes manually or with the help of
-		// insertChild()
-
-		// create a new node
-		// split node in half (assuming 5 keys!)
-		// take the last 2 keys and move them to the other side
-		// take the last key (key #3 that was left behind) and take it out
-		//
-		// check if there's a parent. if not, add parent
-		// manually add child
-		// for leaf nodes, BRING DOWN the divider key – everything needs to be present in the leaf nodes
-		// for internal nodes, when you bump up the divider key, you don't need to bring it down
 	}
 
 	/**
