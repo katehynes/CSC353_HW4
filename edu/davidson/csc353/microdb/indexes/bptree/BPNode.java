@@ -278,9 +278,13 @@ public class BPNode<K extends Comparable<K>, V> {
 	 */
 	public void load(ByteBuffer buffer, Function<String, K> loadKey, Function<String, V> loadValue) {
 		buffer.rewind();
+		// using the way we constructed the string in save, desconstruct and instantiate
+		// the node... actually not sure if this should be creating a new node or we're
+		// just looking for it??
 
 		// TODO: Load from disk (that is, from the buffer), create your own file format
 		// The getInt() and putInt() functions should be very helpful
+
 	}
 
 	/**
@@ -291,7 +295,13 @@ public class BPNode<K extends Comparable<K>, V> {
 	 */
 	public void save(ByteBuffer buffer) {
 		buffer.rewind();
-
+		// creating an arbitrary node
+		// create string holding info of nodes (we don't have this info... do we?)
+		// byte[] stringBytes = string.getBytes()
+		// buffer.put(string)
+		String testing = new String("abc");
+		byte[] stringBytes = testing.getBytes();
+		buffer.put(stringBytes);
 		// TODO: Save to disk (that is, to the buffer), create your own file format
 		// The getInt() and putInt() functions should be very helpful
 		// To save a string, generate it in memory, then use getBytes() and use the
