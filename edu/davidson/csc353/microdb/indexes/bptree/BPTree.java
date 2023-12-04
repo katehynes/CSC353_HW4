@@ -192,8 +192,11 @@ public class BPTree<K extends Comparable<K>, V> {
 		ByteBuffer buffer1 = ByteBuffer.allocate(512);
 		ByteBuffer buffer2 = ByteBuffer.allocate(512);
 
-		node1.save(buffer1);
-		node2.save(buffer2);
+		// should we be changing the params for this too?
+		node1.save(buffer1, BPNode.SIZE, node1.leaf, node1.parent, node1.keys, node1.values, node1.next, node1.children,
+				node1.number);
+		node2.save(buffer2, BPNode.SIZE, node2.leaf, node2.parent, node2.keys, node2.values, node2.next, node2.children,
+				node2.number);
 
 		BPNode<String, Integer> newNode1 = new BPNode<>(false);
 		BPNode<String, Integer> newNode2 = new BPNode<>(true);

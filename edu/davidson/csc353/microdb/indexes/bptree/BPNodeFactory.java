@@ -11,7 +11,7 @@ import java.nio.channels.FileChannel;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.Function;
 
@@ -33,7 +33,7 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	private FileChannel relationChannel;
 
 	// You should change the type of this nodeMap
-	private HashMap<Integer, BPNode<K,V>> nodeMap;
+	private HashMap<Integer, BPNode<K, V>> nodeMap;
 
 	/**
 	 * Creates a new NodeFactory object, which will operate a buffer manager for
@@ -55,11 +55,9 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 			numberNodes = 0;
 
 			nodeMap = new HashMap<>();
-		}
-		catch (FileNotFoundException exception) {
+		} catch (FileNotFoundException exception) {
 			// Ignore: a new file has been created
-		}
-		catch(IOException exception) {
+		} catch (IOException exception) {
 			throw new RuntimeException("Error accessing " + indexName);
 		}
 	}
@@ -67,17 +65,18 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	/**
 	 * Creates a B+Tree node.
 	 * 
-	 * @param leaf Flag indicating whether the node is a leaf (true) or internal node (false)
+	 * @param leaf Flag indicating whether the node is a leaf (true) or internal
+	 *             node (false)
 	 * 
 	 * @return A new B+Tree node.
 	 */
-	public BPNode<K,V> create(boolean leaf) {
-		BPNode<K,V> created = new BPNode<K,V>(leaf);
+	public BPNode<K, V> create(boolean leaf) {
+		BPNode<K, V> created = new BPNode<K, V>(leaf);
 		created.number = numberNodes;
-		
+
 		nodeMap.put(created.number, created);
 		numberNodes++;
-		
+
 		// TODO
 
 		return created;
@@ -88,7 +87,7 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 * 
 	 * @param node Node to be saved into disk.
 	 */
-	public void save(BPNode<K,V> node) {
+	public void save(BPNode<K, V> node) {
 		writeNode(node);
 	}
 
@@ -99,7 +98,7 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 * 
 	 * @return Node read from the disk that has the provided number.
 	 */
-	private BPNode<K,V> readNode(int nodeNumber) {
+	private BPNode<K, V> readNode(int nodeNumber) {
 		// TODO
 		return null;
 	}
@@ -109,8 +108,21 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 * 
 	 * @param node Node to be saved into disk.
 	 */
-	private void writeNode(BPNode<K,V> node) {
-		// TODO
+	private void writeNode(BPNode<K, V> node) {
+		ByteBuffer nodeSave = ByteBuffer.allocate(DISK_SIZE);
+
+		int SIZE = BPNode.SIZE;
+		boolean leaf = node.leaf;
+		int parent = node.parent;
+		ArrayList<K> keys = node.keys;
+		ArrayList<V> values = node.values;
+		int next = node.next;
+		ArrayList<Integer> children = node.children;
+		int number = node.number;
+
+		node.save(nodeSave, SIZE, leaf, parent, keys, values, next, children, number);
+		// "write the buffer ot its appropriate positionin the file", what file are we
+		// talking about?
 	}
 
 	/**
@@ -123,11 +135,12 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	/**
 	 * Returns the node associated with a particular number.
 	 * 
-	 * @param number The number to be converted to node (loading it from disk, if necessary).
+	 * @param number The number to be converted to node (loading it from disk, if
+	 *               necessary).
 	 * 
 	 * @return The node associated with the provided number.
 	 */
-	public BPNode<K,V> getNode(int number) {
+	public BPNode<K, V> getNode(int number) {
 		// TODO
 		return nodeMap.get(number);
 	}
