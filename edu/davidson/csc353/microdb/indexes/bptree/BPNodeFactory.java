@@ -110,17 +110,7 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 */
 	private void writeNode(BPNode<K, V> node) {
 		ByteBuffer nodeSave = ByteBuffer.allocate(DISK_SIZE);
-
-		int SIZE = BPNode.SIZE;
-		boolean leaf = node.leaf;
-		int parent = node.parent;
-		ArrayList<K> keys = node.keys;
-		ArrayList<V> values = node.values;
-		int next = node.next;
-		ArrayList<Integer> children = node.children;
-		int number = node.number;
-
-		node.save(nodeSave, SIZE, leaf, parent, keys, values, next, children, number);
+		node.save(nodeSave);
 		// "write the buffer ot its appropriate positionin the file", what file are we
 		// talking about?
 	}

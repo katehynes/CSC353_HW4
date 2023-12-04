@@ -6,6 +6,8 @@ import java.util.ArrayList;
 
 import java.util.function.Function;
 
+import java.nio.charset.Charset;
+
 /**
  * B+Tree node (internal or leaf).
  * 
@@ -279,10 +281,27 @@ public class BPNode<K extends Comparable<K>, V> {
 	public void load(ByteBuffer buffer, Function<String, K> loadKey, Function<String, V> loadValue) {
 		buffer.rewind();
 
-		// using the way we constructed the string in save, desconstruct and instantiate
-		// the node... actually not sure if this should be creating a new node or we're
-		// just looking for it??
-
+		if (buffer.getInt() == 0) {
+			this.leaf = false;
+		} else {
+			this.leaf = true;
+		}
+		this.parent = buffer.getInt();
+		// for keys
+		for (int i = 0; i < buffer.getInt(); i++) {
+			String keyByteString = new String(buffer.get(), charset); // not sure how to do this
+			// convert resulting string into K using loadKey (how?)
+		}
+		// for values
+		for (int i = 0; i < buffer.getInt(); i++) {
+			String keyByteString = new String(buffer.get(), charset); // not sure how to do this
+			// convert resulting string into V using loadValue (how?)
+		}
+		this.next = buffer.getInt();
+		for (int i = 0; i < buffer.getInt(); i++) {
+			this.children.add(buffer.getInt());
+		}
+		this.number = buffer.getInt();
 		// TODO: Load from disk (that is, from the buffer), create your own file format
 		// The getInt() and putInt() functions should be very helpful
 
@@ -294,16 +313,37 @@ public class BPNode<K extends Comparable<K>, V> {
 	 * 
 	 * @param buffer
 	 */
-	public void save(ByteBuffer buffer, int fSIZE, boolean fLeaf, int fParent, ArrayList<K> fKeys, ArrayList<V> fValues,
-			int fNext, ArrayList<Integer> fChildren, int fNumber) {
+	public void save(ByteBuffer buffer) {
 		buffer.rewind();
 
-		String testing = new String(
-				"SIZE:" + fSIZE + "\n" + "leaf:" + fLeaf + "\n" + "parent:" + fParent + "\n" + "keys:" + fKeys + "\n"
-						+ "values:" + fValues + "\n" + "next:" + fNext + "\n" + "children:" + fChildren + "\n"
-						+ "number:" + fNumber);
-		byte[] stringBytes = testing.getBytes();
-		buffer.put(stringBytes);
+		int leafInt = 0;
+		if (this.leaf) {
+			leafInt = 1;
+		}
+		buffer.putInt(leafInt);
+		buffer.putInt(this.parent);
+		// size number
+		buffer.putInt(this.keys.size());
+		for (int i = 0; i < this.keys.size(); i++) {
+			String keyString = new String("" + this.keys.get(i));
+			byte[] stringBytes = keyString.getBytes();
+			buffer.put(stringBytes);
+		}
+		// size number
+		buffer.putInt(this.values.size());
+		for (int i = 0; i < this.keys.size(); i++) {
+			String keyString = new String("" + this.values.get(i));
+			byte[] stringBytes = keyString.getBytes();
+			buffer.put(stringBytes);
+		}
+		buffer.putInt(this.next);
+		// size number
+		buffer.putInt(this.children.size());
+		for (int i = 0; i < this.children.size(); i++) {
+			buffer.putInt(this.children.get(i));
+		}
+		buffer.putInt(this.number);
+
 		// TODO: Save to disk (that is, to the buffer), create your own file format
 		// The getInt() and putInt() functions should be very helpful
 		// To save a string, generate it in memory, then use getBytes() and use the
