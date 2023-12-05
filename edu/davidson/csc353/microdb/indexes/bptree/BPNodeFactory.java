@@ -11,10 +11,12 @@ import java.nio.channels.FileChannel;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.Function;
 
+import edu.davidson.csc353.microdb.files.Block;
 import edu.davidson.csc353.microdb.utils.DecentPQ;
 
 public class BPNodeFactory<K extends Comparable<K>, V> {
@@ -34,6 +36,21 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 
 	// You should change the type of this nodeMap
 	private HashMap<Integer, BPNode<K, V>> nodeMap;
+	private DecentPQ<NodeTimestamp> nodePQ;
+
+	private class NodeTimestamp implements Comparable<NodeTimestamp> {
+		public BPNode<K, V> node;
+		public long lastUsed;
+
+		public NodeTimestamp(BPNode<K, V> node, long lastUsed) {
+			this.node = node;
+			this.lastUsed = lastUsed;
+		}
+
+		public int compareTo(NodeTimestamp other) {
+			return (int) (lastUsed - other.lastUsed);
+		}
+	}
 
 	/**
 	 * Creates a new NodeFactory object, which will operate a buffer manager for
@@ -73,11 +90,10 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	public BPNode<K, V> create(boolean leaf) {
 		BPNode<K, V> created = new BPNode<K, V>(leaf);
 		created.number = numberNodes;
-
+		NodeTimestamp newOne = new NodeTimestamp(created, System.nanoTime());
 		nodeMap.put(created.number, created);
+		nodePQ.add(newOne);
 		numberNodes++;
-
-		// TODO
 
 		return created;
 	}
@@ -111,7 +127,7 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	private void writeNode(BPNode<K, V> node) {
 		ByteBuffer nodeSave = ByteBuffer.allocate(DISK_SIZE);
 		node.save(nodeSave);
-		// "write the buffer ot its appropriate positionin the file", what file are we
+		// "write the buffer to its appropriate positionin the file", what file are we
 		// talking about?
 	}
 
@@ -120,6 +136,10 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 */
 	private void evict() {
 		// TODO
+
+		// need a queue or smthn keeping track of whats being used
+		// question: doesn't the information never really leave the disk? wym back into
+		// disk?
 	}
 
 	/**
@@ -132,6 +152,9 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 */
 	public BPNode<K, V> getNode(int number) {
 		// TODO
+		// check if in memory
+		// look in disk if not
+		// ByteBuffer looking = ByteBuffer.
 		return nodeMap.get(number);
 	}
 }

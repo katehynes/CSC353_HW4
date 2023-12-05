@@ -289,12 +289,13 @@ public class BPNode<K extends Comparable<K>, V> {
 		this.parent = buffer.getInt();
 		// for keys
 		for (int i = 0; i < buffer.getInt(); i++) {
-			String keyByteString = new String(buffer.get(), charset); // not sure how to do this
+			String keyByteString = new String(buffer.array());
 			// convert resulting string into K using loadKey (how?)
+			// this.keys.add(loadKey(keyByteString)); ???
 		}
 		// for values
 		for (int i = 0; i < buffer.getInt(); i++) {
-			String keyByteString = new String(buffer.get(), charset); // not sure how to do this
+			String ValueByteString = new String(buffer.array());
 			// convert resulting string into V using loadValue (how?)
 		}
 		this.next = buffer.getInt();
