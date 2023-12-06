@@ -34,7 +34,7 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	private RandomAccessFile relationFile;
 	private FileChannel relationChannel;
 
-	// You should change the type of this nodeMap
+	// TODO You should change the type of this nodeMap
 	private HashMap<Integer, BPNode<K, V>> nodeMap;
 	private DecentPQ<NodeTimestamp> nodePQ;
 
@@ -72,6 +72,7 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 			numberNodes = 0;
 
 			nodeMap = new HashMap<>();
+			nodePQ = new DecentPQ<>();
 		} catch (FileNotFoundException exception) {
 			// Ignore: a new file has been created
 		} catch (IOException exception) {
@@ -116,6 +117,11 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 */
 	private BPNode<K, V> readNode(int nodeNumber) {
 		// TODO
+		// index into file chunk from nodeNumber * Disk size.
+		// read from disk into a ByteBuffer
+		// read in information from the ByteBuffer (im guessing into varables?)
+		// create a new node. "in memory"
+		// call the new node.load()
 		return null;
 	}
 
@@ -136,8 +142,9 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 */
 	private void evict() {
 		// TODO
-
-		// need a queue or smthn keeping track of whats being used
+		// NodeTimestamp oldest = nodePQ.removeMin(); // removing the smallest
+		// nodeMap.remove(oldest.node.getNode());
+		// relation.writeNode(oldest.node);
 		// question: doesn't the information never really leave the disk? wym back into
 		// disk?
 	}
