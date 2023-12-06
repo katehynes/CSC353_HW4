@@ -6,6 +6,8 @@ import java.util.ArrayList;
 
 import java.util.function.Function;
 
+import java.nio.charset.Charset;
+
 /**
  * B+Tree node (internal or leaf).
  * 
@@ -279,36 +281,31 @@ public class BPNode<K extends Comparable<K>, V> {
 	public void load(ByteBuffer buffer, Function<String, K> loadKey, Function<String, V> loadValue) {
 		buffer.rewind();
 
+		if (buffer.getInt() == 0) {
+			this.leaf = false;
+		} else {
+			this.leaf = true;
+		}
+		this.parent = buffer.getInt();
+		// for keys
+		for (int i = 0; i < buffer.getInt(); i++) {
+			String keyByteString = new String(buffer.array());
+			// convert resulting string into K using loadKey (how?)
+			// this.keys.add(loadKey(keyByteString)); ???
+		}
+		// for values
+		for (int i = 0; i < buffer.getInt(); i++) {
+			String ValueByteString = new String(buffer.array());
+			// convert resulting string into V using loadValue (how?)
+		}
+		this.next = buffer.getInt();
+		for (int i = 0; i < buffer.getInt(); i++) {
+			this.children.add(buffer.getInt());
+		}
+		this.number = buffer.getInt();
 		// TODO: Load from disk (that is, from the buffer), create your own file format
 		// The getInt() and putInt() functions should be very helpful
-		// want BPnf to take the node & the buffer and write to the disk
-		// offset = 2 * disk size / size of the buffer
-		/*
-		 * go to 3x the disk size and call read
-		 * 
-		 * put int to put info into the buffer – if leaf or not,
-		 * keys and values if you're leaf,
-		 * keys and children if you're non-leaf
-		 * 0 | 
-		 * goover array of keys, and do .toString but add seperators
-		 * take that string and dump it into the buffer
-		 * when you load it, parse through the seperators and put the values back in
-		 * load function splits string & reads it into array
-		 * for internals, you have one more child than keys. for leafs, # keys = # values
-		 * use the functions to load from a key to a key type
-		 * you don't need to loadChildren b/c they're always integers
-		 * 
-		 * whenever you get the string rep of a node to dump into the buffer, do a putInt with length & dump the bytes
-		 * read the number & create new byte array with that number
-		 * buffer.get -> pass in that buffer, reads in as many bytes as the length of the buffer = the length of the string
-		 * 
-		 * 
-		 * save – write the node you're kicking out to the disk/buffer
-		 * allocate a buffer of disc size, save, and fire channel.write
-		 * 
-		 * load - create a new node with nothing inside, 
-		 * and put the buffer representation of that new node into the node
-		 */
+
 	}
 
 	/**
@@ -319,6 +316,34 @@ public class BPNode<K extends Comparable<K>, V> {
 	 */
 	public void save(ByteBuffer buffer) {
 		buffer.rewind();
+
+		int leafInt = 0;
+		if (this.leaf) {
+			leafInt = 1;
+		}
+		buffer.putInt(leafInt);
+		buffer.putInt(this.parent);
+		// size number
+		buffer.putInt(this.keys.size());
+		for (int i = 0; i < this.keys.size(); i++) {
+			String keyString = new String("" + this.keys.get(i));
+			byte[] stringBytes = keyString.getBytes();
+			buffer.put(stringBytes);
+		}
+		// size number
+		buffer.putInt(this.values.size());
+		for (int i = 0; i < this.keys.size(); i++) {
+			String keyString = new String("" + this.values.get(i));
+			byte[] stringBytes = keyString.getBytes();
+			buffer.put(stringBytes);
+		}
+		buffer.putInt(this.next);
+		// size number
+		buffer.putInt(this.children.size());
+		for (int i = 0; i < this.children.size(); i++) {
+			buffer.putInt(this.children.get(i));
+		}
+		buffer.putInt(this.number);
 
 		// TODO: Save to disk (that is, to the buffer), create your own file format
 		// The getInt() and putInt() functions should be very helpful

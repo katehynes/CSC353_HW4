@@ -11,10 +11,12 @@ import java.nio.channels.FileChannel;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
+import java.security.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.Function;
 
+import edu.davidson.csc353.microdb.files.Block;
 import edu.davidson.csc353.microdb.utils.DecentPQ;
 
 public class BPNodeFactory<K extends Comparable<K>, V> {
@@ -33,7 +35,22 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	private FileChannel relationChannel;
 
 	// You should change the type of this nodeMap
-	private HashMap<Integer, BPNode<K,V>> nodeMap;
+	private HashMap<Integer, BPNode<K, V>> nodeMap;
+	private DecentPQ<NodeTimestamp> nodePQ;
+
+	private class NodeTimestamp implements Comparable<NodeTimestamp> {
+		public BPNode<K, V> node;
+		public long lastUsed;
+
+		public NodeTimestamp(BPNode<K, V> node, long lastUsed) {
+			this.node = node;
+			this.lastUsed = lastUsed;
+		}
+
+		public int compareTo(NodeTimestamp other) {
+			return (int) (lastUsed - other.lastUsed);
+		}
+	}
 
 	/**
 	 * Creates a new NodeFactory object, which will operate a buffer manager for
@@ -55,11 +72,9 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 			numberNodes = 0;
 
 			nodeMap = new HashMap<>();
-		}
-		catch (FileNotFoundException exception) {
+		} catch (FileNotFoundException exception) {
 			// Ignore: a new file has been created
-		}
-		catch(IOException exception) {
+		} catch (IOException exception) {
 			throw new RuntimeException("Error accessing " + indexName);
 		}
 	}
@@ -67,18 +82,18 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	/**
 	 * Creates a B+Tree node.
 	 * 
-	 * @param leaf Flag indicating whether the node is a leaf (true) or internal node (false)
+	 * @param leaf Flag indicating whether the node is a leaf (true) or internal
+	 *             node (false)
 	 * 
 	 * @return A new B+Tree node.
 	 */
-	public BPNode<K,V> create(boolean leaf) {
-		BPNode<K,V> created = new BPNode<K,V>(leaf);
+	public BPNode<K, V> create(boolean leaf) {
+		BPNode<K, V> created = new BPNode<K, V>(leaf);
 		created.number = numberNodes;
-		
+		NodeTimestamp newOne = new NodeTimestamp(created, System.nanoTime());
 		nodeMap.put(created.number, created);
+		nodePQ.add(newOne);
 		numberNodes++;
-		
-		// TODO
 
 		return created;
 	}
@@ -88,7 +103,7 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 * 
 	 * @param node Node to be saved into disk.
 	 */
-	public void save(BPNode<K,V> node) {
+	public void save(BPNode<K, V> node) {
 		writeNode(node);
 	}
 
@@ -99,7 +114,7 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 * 
 	 * @return Node read from the disk that has the provided number.
 	 */
-	private BPNode<K,V> readNode(int nodeNumber) {
+	private BPNode<K, V> readNode(int nodeNumber) {
 		// TODO
 		return null;
 	}
@@ -109,8 +124,11 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 * 
 	 * @param node Node to be saved into disk.
 	 */
-	private void writeNode(BPNode<K,V> node) {
-		// TODO
+	private void writeNode(BPNode<K, V> node) {
+		ByteBuffer nodeSave = ByteBuffer.allocate(DISK_SIZE);
+		node.save(nodeSave);
+		// "write the buffer to its appropriate positionin the file", what file are we
+		// talking about?
 	}
 
 	/**
@@ -118,17 +136,25 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 */
 	private void evict() {
 		// TODO
+
+		// need a queue or smthn keeping track of whats being used
+		// question: doesn't the information never really leave the disk? wym back into
+		// disk?
 	}
 
 	/**
 	 * Returns the node associated with a particular number.
 	 * 
-	 * @param number The number to be converted to node (loading it from disk, if necessary).
+	 * @param number The number to be converted to node (loading it from disk, if
+	 *               necessary).
 	 * 
 	 * @return The node associated with the provided number.
 	 */
-	public BPNode<K,V> getNode(int number) {
+	public BPNode<K, V> getNode(int number) {
 		// TODO
+		// check if in memory
+		// look in disk if not
+		// ByteBuffer looking = ByteBuffer.
 		return nodeMap.get(number);
 	}
 }
