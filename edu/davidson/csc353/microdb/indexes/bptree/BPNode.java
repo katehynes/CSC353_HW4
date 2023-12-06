@@ -288,6 +288,9 @@ public class BPNode<K extends Comparable<K>, V> {
 		}
 		this.parent = buffer.getInt();
 		// for keys
+		int keyLength = buffer.getInt();
+		Byte[] getKeyBytes = new Byte[keyLength];
+		buffer.get(getKeyBytes);
 		String keyByteString = "";
 		keyByteString = new String(buffer.array());
 		// is this the right way to convert from byte back to string?? getoing weird
@@ -372,22 +375,24 @@ public class BPNode<K extends Comparable<K>, V> {
 		buffer.putInt(leafInt);
 		buffer.putInt(this.parent);
 		// size number
-		buffer.putInt(this.keys.size());
+		// buffer.putInt(this.keys.size());
 		String keyString = "";
 		for (int i = 0; i < this.keys.size(); i++) {
 			keyString = keyString + this.keys.get(i) + "$";
 		}
 		byte[] stringKBytes = keyString.getBytes();
+		buffer.putInt(stringKBytes.length);
 		// put int bytes length
 		buffer.put(stringKBytes);
 		// size number
 		if (leafInt == 1) {
-			buffer.putInt(this.keys.size());
+			// buffer.putInt(this.keys.size());
 			String valString = "";
 			for (int i = 0; i < this.keys.size(); i++) {
 				valString = valString + this.values.get(i) + "$";
 			}
 			byte[] stringVBytes = valString.getBytes();
+			buffer.putInt(stringVBytes.length);
 			buffer.put(stringVBytes);
 			buffer.putInt(this.next);
 		} else {
