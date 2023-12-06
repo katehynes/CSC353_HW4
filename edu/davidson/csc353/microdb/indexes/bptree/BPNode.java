@@ -292,7 +292,7 @@ public class BPNode<K extends Comparable<K>, V> {
 		byte[] getKeyBytes = new byte[keyLength];
 		buffer.get(getKeyBytes);
 		String keyByteString = new String(getKeyBytes);
-		String[] keyParts = keyByteString.split("$");
+		String[] keyParts = keyByteString.split("\\$");
 		for (int i = 0; i < keyParts.length; i++) {
 			K key = loadKey.apply(keyParts[i]);
 			this.keys.add(key);
@@ -303,7 +303,7 @@ public class BPNode<K extends Comparable<K>, V> {
 			byte[] getValueBytes = new byte[valueLength];
 			buffer.get(getValueBytes);
 			String valueByteString = new String(getValueBytes); // should use default charset to convert into string
-			String[] valueParts = valueByteString.split("$"); // where is all the null characters coming from?
+			String[] valueParts = valueByteString.split("\\$"); // where is all the null characters coming from?
 			for (int i = 0; i < valueParts.length; i++) {
 				V value = loadValue.apply(valueParts[i]);
 				this.values.add(value);
