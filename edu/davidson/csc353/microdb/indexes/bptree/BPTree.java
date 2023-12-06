@@ -204,6 +204,7 @@ public class BPTree<K extends Comparable<K>, V> {
 
 		System.out.println("Original root: " + node1 + ", parent = " + node1.parent + ", next = " + node1.next
 				+ ", number = " + newNode1.number);
+				// why is this newNode1.number and not node1.number?
 		System.out.println("Loaded root:   " + newNode1 + ", parent = " + newNode1.parent + ", next = " + newNode1.next
 				+ ", number = " + newNode1.number);
 

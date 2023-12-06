@@ -288,19 +288,30 @@ public class BPNode<K extends Comparable<K>, V> {
 		}
 		this.parent = buffer.getInt();
 		// for keys
-		for (int i = 0; i < buffer.getInt(); i++) {
-			String keyByteString = new String(buffer.array());
-			// convert resulting string into K using loadKey (how?)
-			// this.keys.add(loadKey(keyByteString)); ???
+		String keyByteString = "";
+		keyByteString = new String(buffer.array());
+		// is this the right way to convert from byte back to string?? getoing weird wutput (diamond question marks) do we get it to split around the chars we want
+		// also it's returning  "   a$b$c$ 1$2$3$ " as one string... don'tt we want it to be 2 strings
+		String[] keyParts = keyByteString.split("$");
+		for(int i = 0; i < keyParts.length; i++){
+			K key = loadKey.apply(keyParts[i]);
+			this.keys.add(key);
 		}
-		// for values
-		for (int i = 0; i < buffer.getInt(); i++) {
-			String ValueByteString = new String(buffer.array());
-			// convert resulting string into V using loadValue (how?)
+		if (this.leaf){
+			// for values
+			String valueByteString = "";
+			valueByteString = new String(buffer.array());
+			String[] valueParts = valueByteString.split("$");
+			for(int i = 0; i < valueParts.length; i++){
+				V value = loadValue.apply(valueParts[i]);
+				this.values.add(value);
+			}
+			this.next = buffer.getInt();
 		}
-		this.next = buffer.getInt();
-		for (int i = 0; i < buffer.getInt(); i++) {
-			this.children.add(buffer.getInt());
+		else{
+			for (int i = 0; i < buffer.getInt(); i++) {
+				this.children.add(buffer.getInt());
+			}
 		}
 		this.number = buffer.getInt();
 		// TODO: Load from disk (that is, from the buffer), create your own file format
@@ -355,23 +366,28 @@ public class BPNode<K extends Comparable<K>, V> {
 		buffer.putInt(this.parent);
 		// size number
 		buffer.putInt(this.keys.size());
-		for (int i = 0; i < this.keys.size(); i++) {
-			String keyString = new String("" + this.keys.get(i));
-			byte[] stringBytes = keyString.getBytes();
-			buffer.put(stringBytes);
-		}
+			String keyString = "";
+			for (int i = 0; i < this.keys.size(); i++) {
+				keyString = keyString + this.keys.get(i) + "$";
+			}
+			byte[] stringKBytes = keyString.getBytes();
+			buffer.put(stringKBytes);
 		// size number
-		buffer.putInt(this.values.size());
-		for (int i = 0; i < this.keys.size(); i++) {
-			String keyString = new String("" + this.values.get(i));
-			byte[] stringBytes = keyString.getBytes();
-			buffer.put(stringBytes);
-		}
-		buffer.putInt(this.next);
-		// size number
-		buffer.putInt(this.children.size());
-		for (int i = 0; i < this.children.size(); i++) {
-			buffer.putInt(this.children.get(i));
+		if (leafInt == 1) {
+			buffer.putInt(this.keys.size());
+			String valString = "";
+			for (int i = 0; i < this.keys.size(); i++) {
+				valString = valString + this.values.get(i) + "$";
+			}
+			byte[] stringVBytes = valString.getBytes();
+			buffer.put(stringVBytes);
+			buffer.putInt(this.next);
+		} 
+		else {
+			buffer.putInt(this.children.size());
+			for (int i = 0; i < this.children.size(); i++) {
+				buffer.putInt(this.children.get(i));
+			}
 		}
 		buffer.putInt(this.number);
 
