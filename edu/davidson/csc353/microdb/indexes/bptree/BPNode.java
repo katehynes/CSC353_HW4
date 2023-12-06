@@ -289,27 +289,20 @@ public class BPNode<K extends Comparable<K>, V> {
 		this.parent = buffer.getInt();
 		// for keys
 		int keyLength = buffer.getInt();
-		Byte[] getKeyBytes = new Byte[keyLength];
+		byte[] getKeyBytes = new byte[keyLength];
 		buffer.get(getKeyBytes);
-		String keyByteString = "";
-		keyByteString = new String(buffer.array());
-		// is this the right way to convert from byte back to string?? getoing weird
-		// wutput (diamond question marks) do we get it to split around the chars we
-		// want
-		// also it's returning " a$b$c$ 1$2$3$ " as one string... don'tt we want it to
-		// be 2 strings
+		String keyByteString = new String(getKeyBytes);
 		String[] keyParts = keyByteString.split("$");
 		for (int i = 0; i < keyParts.length; i++) {
 			K key = loadKey.apply(keyParts[i]);
 			this.keys.add(key);
-			// read length then byte [] b = newBythe[legnth]
-			// buffer.get(b)
-			// new string(byte array)
 		}
 		if (this.leaf) {
 			// for values
-			String valueByteString = "";
-			valueByteString = new String(buffer.array()); // should use default charset to convert into string
+			int valueLength = buffer.getInt();
+			byte[] getValueBytes = new byte[valueLength];
+			buffer.get(getValueBytes);
+			String valueByteString = new String(getValueBytes); // should use default charset to convert into string
 			String[] valueParts = valueByteString.split("$"); // where is all the null characters coming from?
 			for (int i = 0; i < valueParts.length; i++) {
 				V value = loadValue.apply(valueParts[i]);
