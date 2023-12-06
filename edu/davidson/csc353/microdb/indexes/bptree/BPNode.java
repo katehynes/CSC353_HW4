@@ -308,6 +308,36 @@ public class BPNode<K extends Comparable<K>, V> {
 
 	}
 
+
+	// want BPnf to take the node & the buffer and write to the disk
+		// offset = 2 * disk size / size of the buffer
+		/*
+		 * go to 3x the disk size and call read
+		 * 
+		 * put int to put info into the buffer – if leaf or not,
+		 * keys and values if you're leaf,
+		 * keys and children if you're non-leaf
+		 * 0 | 
+		 * goover array of keys, and do .toString but add seperators
+		 * take that string and dump it into the buffer
+		 * when you load it, parse through the seperators and put the values back in
+		 * load function splits string & reads it into array
+		 * for internals, you have one more child than keys. for leafs, # keys = # values
+		 * use the functions to load from a key to a key type
+		 * you don't need to loadChildren b/c they're always integers
+		 * 
+		 * whenever you get the string rep of a node to dump into the buffer, do a putInt with length & dump the bytes
+		 * read the number & create new byte array with that number
+		 * buffer.get -> pass in that buffer, reads in as many bytes as the length of the buffer = the length of the string
+		 * 
+		 * 
+		 * save – write the node you're kicking out to the disk/buffer
+		 * allocate a buffer of disc size, save, and fire channel.write
+		 * 
+		 * load - create a new node with nothing inside, 
+		 * and put the buffer representation of that new node into the node
+		 */
+
 	/**
 	 * Save the memory representation of the B+Tree node
 	 * into a buffer of 512 bytes (to be stored on disk).
