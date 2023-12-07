@@ -97,7 +97,20 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 		nodeMap.put(created.number, nodeTimestamp);
 		nodePQ.add(nodeTimestamp);
 		numberNodes++;
-
+		// create a node or reading a node from the disk. you're about to add an entry
+		// so have if statement to see if the current capacity is at capacity then kick
+		// one out
+		// run. if it runs as before than its first test
+		// create a function called evictall(). keep evicting everything
+		// wipe out all nodes from memory
+		// go into main tester. make operation and ask for bvalue associated with key
+		// call wipe out function, next read all nodes from disk
+		// you know youre writing adn reading from right place
+		// node buffer buffer disk disk buffer buffer disk.
+		// when evicting node, is the right one being evicted? call evict, if you are
+		// calling min (i missed this)
+		// update timestamp of node and update pq. test by inspection
+		// 
 		return created;
 	}
 
@@ -189,35 +202,13 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 			nodeTimestamp.lastUsed = System.nanoTime();
 			nodePQ.increaseKey(nodeTimestamp);
 			return nodeTimestamp.node;
-		}
-		else {
-			BPNode<K,V> loadedNode = readNode(number);
+		} else {
+			BPNode<K, V> loadedNode = readNode(number);
 			NodeTimestamp nodeTimestamp = new NodeTimestamp(loadedNode, System.nanoTime());
 			nodeMap.put(loadedNode.number, nodeTimestamp);
 			nodePQ.add(nodeTimestamp);
 			// or return loadedNode?
 			return nodeTimestamp.node;
 		}
-		// NodeTimestamp nodeTimestamp = nodeMap.get(number);
-		// nodeTimestamp.lastUsed = System.nanoTime();
-
-		// boolean toFind = true;
-		// if (toFind) {
-		// 	returnNode = nodeMap.get(number);
-		// } else {
-			// long diskRead = number * DISK_SIZE;
-			// ByteBuffer nodeObj = ByteBuffer.allocate(DISK_SIZE);
-			// try {
-			// relationChannel.read(nodeObj, diskRead);
-			// } catch (IOException e) {
-			// // TODO Auto-generated catch block
-			// e.printStackTrace();
-			// }
-		// 	returnNode = readNode(number);
-		// }
-		// // check if in memory
-		// // look in disk if not
-		// // ByteBuffer looking = ByteBuffer.
-		// return returnNode;
 	}
 }
