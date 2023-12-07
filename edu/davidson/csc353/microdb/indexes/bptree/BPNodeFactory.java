@@ -37,6 +37,7 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	private FileChannel relationChannel;
 
 	// TODO You should change the type of this nodeMap
+	// CHANGE! changed this from type Int, BPNode to Int, NodeTimestamp based on MicroDB
 	private HashMap<Integer, NodeTimestamp> nodeMap;
 	private DecentPQ<NodeTimestamp> nodePQ;
 
@@ -93,6 +94,8 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	public BPNode<K, V> create(boolean leaf) {
 		BPNode<K, V> created = new BPNode<K, V>(leaf);
 		created.number = numberNodes;
+		// CHANGE! I changed the name of the nodeTimestamp var to nodeTimestamp bc it was clearer to me, we can change back tho!
+		// Also, I put nodeTimestamp into nodeMap instead of created!
 		NodeTimestamp nodeTimestamp = new NodeTimestamp(created, System.nanoTime());
 		nodeMap.put(created.number, nodeTimestamp);
 		nodePQ.add(nodeTimestamp);
@@ -128,11 +131,14 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 		ByteBuffer nodeObj = ByteBuffer.allocate(DISK_SIZE);
 		try {
 			relationChannel.read(nodeObj, diskRead);
-			// is this considered in memory??
+			// CHANGE! I added all this stuff based on MicroDB.
+			// idea: create a new node, load the nodeObj from buffer into this new node
+			// QUESTION: is creating a new node this way considered creating it "in memory" (pdf specifies in memory)??
 			BPNode<String, Integer> newNode = new BPNode<>(false);
-			// ???? or do we pass in loadKey and loadValue?
+			// QUESTION: what do we pass in here – these functions, or do we pass in loadKey and loadValue??
 			newNode.load(nodeObj, k -> k, s -> Integer.parseInt(s));
 		} catch (IOException e) {
+			// QUESTION: what should we do for run time exceptions?
 			throw new RuntimeException("Error accessing node with number" + nodeNumber);
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
@@ -147,14 +153,16 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 * @param node Node to be saved into disk.
 	 */
 	private void writeNode(BPNode<K, V> node) {
+		// CHANGE! i changed the name from nodeSave to buffer
 		ByteBuffer buffer = ByteBuffer.allocate(DISK_SIZE);
 		node.save(buffer);
 		long diskPos = node.number * DISK_SIZE;
 		try {
-			// writeBlock() has blockBuffer.rewind() here. should we have:
+			// QUESTION: writeBlock() has blockBuffer.rewind() here. should we have:
 			// buffer.rewind();
 			relationChannel.write(buffer, diskPos);
 		} catch (IOException e) {
+			// QUESTION: again, not sure what to do for the exceptions. this is kinda based off of microDB
 			throw new RuntimeException("Error accessing " + node.number);
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
@@ -165,9 +173,11 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 * Evicts the last recently used node back into disk.
 	 */
 	private void evict() {
-		// TODO
+		// CHANGE! just used most of the stuff you had. 
+		// Only changed it to remove(oldest.node.number) instead of remove(oldest.getNode())
+		// im not sure which we want.
 		NodeTimestamp oldest = nodePQ.removeMin(); // removing the smallest
-		// or, nodeMap.remove(oldest.getNode()); ?
+		// QUESTION: How should we get the node? Can we do it this way, or, nodeMap.remove(oldest.getNode()); ?
 		nodeMap.remove(oldest.node.number);
 		writeNode(oldest.node);
 		// question: doesn't the information never really leave the disk? wym back into
@@ -183,21 +193,26 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 * @return The node associated with the provided number.
 	 */
 	public BPNode<K, V> getNode(int number) {
-		// TODO
+		// CHANGE! basing it off of MicroDB files.
+		// if nodeMap has the node number, then get the associated timestamp,
+		// update the timestamp for that node, increase its key in the PQ,
+		// and return this node
 		if (nodeMap.containsKey(number)) {
 			NodeTimestamp nodeTimestamp = nodeMap.get(number);
 			nodeTimestamp.lastUsed = System.nanoTime();
 			nodePQ.increaseKey(nodeTimestamp);
 			return nodeTimestamp.node;
 		}
+		// wasn't quite as sure what to do here.
 		else {
 			BPNode<K,V> loadedNode = readNode(number);
 			NodeTimestamp nodeTimestamp = new NodeTimestamp(loadedNode, System.nanoTime());
 			nodeMap.put(loadedNode.number, nodeTimestamp);
 			nodePQ.add(nodeTimestamp);
-			// or return loadedNode?
+			// QUESTION: is this how we should access/return the node? Should we return loadedNode instead?
 			return nodeTimestamp.node;
 		}
+
 		// NodeTimestamp nodeTimestamp = nodeMap.get(number);
 		// nodeTimestamp.lastUsed = System.nanoTime();
 
