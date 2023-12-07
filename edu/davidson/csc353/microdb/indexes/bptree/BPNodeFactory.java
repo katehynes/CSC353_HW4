@@ -97,6 +97,9 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 		// CHANGE! I changed the name of the nodeTimestamp var to nodeTimestamp bc it was clearer to me, we can change back tho!
 		// Also, I put nodeTimestamp into nodeMap instead of created!
 		NodeTimestamp nodeTimestamp = new NodeTimestamp(created, System.nanoTime());
+		if (nodeMap.size() == BPNodeFactory.CAPACITY) {
+			evict();
+		}
 		nodeMap.put(created.number, nodeTimestamp);
 		nodePQ.add(nodeTimestamp);
 		numberNodes++;
@@ -134,17 +137,16 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 			// CHANGE! I added all this stuff based on MicroDB.
 			// idea: create a new node, load the nodeObj from buffer into this new node
 			// QUESTION: is creating a new node this way considered creating it "in memory" (pdf specifies in memory)??
-			BPNode<String, Integer> newNode = new BPNode<>(false);
+			BPNode<K, V> newNode = new BPNode<>(false);
 			// QUESTION: what do we pass in here – these functions, or do we pass in loadKey and loadValue??
-			newNode.load(nodeObj, k -> k, s -> Integer.parseInt(s));
+			newNode.load(nodeObj, loadKey, loadValue);
+			return newNode;
 		} catch (IOException e) {
 			// QUESTION: what should we do for run time exceptions?
 			throw new RuntimeException("Error accessing node with number" + nodeNumber);
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
 		}
-
-		return null;
 	}
 
 	/**
@@ -204,9 +206,14 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 			return nodeTimestamp.node;
 		}
 		// wasn't quite as sure what to do here.
+		// before adding an entry to your map – do the if statement
+		// check if you've just gone over capacity – if you have, call evict
 		else {
 			BPNode<K,V> loadedNode = readNode(number);
 			NodeTimestamp nodeTimestamp = new NodeTimestamp(loadedNode, System.nanoTime());
+			if (nodeMap.size() == BPNodeFactory.CAPACITY) {
+				evict();
+			}
 			nodeMap.put(loadedNode.number, nodeTimestamp);
 			nodePQ.add(nodeTimestamp);
 			// QUESTION: is this how we should access/return the node? Should we return loadedNode instead?
@@ -234,5 +241,19 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 		// // look in disk if not
 		// // ByteBuffer looking = ByteBuffer.
 		// return returnNode;
+	}
+	// create evictAll()
+		// while map has any values – evict
+		// then, go into main tester
+		// make an operation – as for value associated with the key
+		// call this wipeout function
+		// force all nodes to be read back from disk
+		// when you evict the node, are you evicting the right one? –
+		// when you call evict, call remove min in PQ
+		// make sure every time you return a node, update the timestamp & update the PQ
+	public void evictAll() {
+		while (!nodeMap.isEmpty()) {
+			evict();
+		}
 	}
 }

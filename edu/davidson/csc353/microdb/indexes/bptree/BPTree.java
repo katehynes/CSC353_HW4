@@ -196,6 +196,8 @@ public class BPTree<K extends Comparable<K>, V> {
 		node1.save(buffer1);
 		node2.save(buffer2);
 
+		testIndex.nodeFactory.evictAll();
+
 		BPNode<String, Integer> newNode1 = new BPNode<>(false);
 		BPNode<String, Integer> newNode2 = new BPNode<>(true);
 
