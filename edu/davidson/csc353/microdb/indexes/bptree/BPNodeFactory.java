@@ -93,9 +93,9 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	public BPNode<K, V> create(boolean leaf) {
 		BPNode<K, V> created = new BPNode<K, V>(leaf);
 		created.number = numberNodes;
-		NodeTimestamp newOne = new NodeTimestamp(created, System.nanoTime());
-		nodeMap.put(created.number, created);
-		nodePQ.add(newOne);
+		NodeTimestamp nodeTimestamp = new NodeTimestamp(created, System.nanoTime());
+		nodeMap.put(created.number, nodeTimestamp);
+		nodePQ.add(nodeTimestamp);
 		numberNodes++;
 
 		return created;
@@ -128,9 +128,14 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 		ByteBuffer nodeObj = ByteBuffer.allocate(DISK_SIZE);
 		try {
 			relationChannel.read(nodeObj, diskRead);
+			// is this considered in memory??
+			BPNode<String, Integer> newNode = new BPNode<>(false);
+			// ???? or do we pass in loadKey and loadValue?
+			newNode.load(nodeObj, k -> k, s -> Integer.parseInt(s));
 		} catch (IOException e) {
+			throw new RuntimeException("Error accessing node with number" + nodeNumber);
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 
 		return null;
@@ -142,14 +147,17 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 * @param node Node to be saved into disk.
 	 */
 	private void writeNode(BPNode<K, V> node) {
-		ByteBuffer nodeSave = ByteBuffer.allocate(DISK_SIZE);
-		node.save(nodeSave);
+		ByteBuffer buffer = ByteBuffer.allocate(DISK_SIZE);
+		node.save(buffer);
 		long diskPos = node.number * DISK_SIZE;
 		try {
-			relationChannel.write(nodeSave, diskPos);
+			// writeBlock() has blockBuffer.rewind() here. should we have:
+			// buffer.rewind();
+			relationChannel.write(buffer, diskPos);
 		} catch (IOException e) {
+			throw new RuntimeException("Error accessing " + node.number);
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
 
@@ -158,9 +166,10 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 */
 	private void evict() {
 		// TODO
-		// NodeTimestamp oldest = nodePQ.removeMin(); // removing the smallest
-		// nodeMap.remove(oldest.node.getNode());
-		// relation.writeNode(oldest.node);
+		NodeTimestamp oldest = nodePQ.removeMin(); // removing the smallest
+		// or, nodeMap.remove(oldest.getNode()); ?
+		nodeMap.remove(oldest.node.number);
+		writeNode(oldest.node);
 		// question: doesn't the information never really leave the disk? wym back into
 		// disk?
 	}
@@ -175,11 +184,27 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 */
 	public BPNode<K, V> getNode(int number) {
 		// TODO
-		BPNode<K, V> returnNode;
-		boolean toFind = true;
-		if (toFind) {
-			returnNode = nodeMap.get(number);
-		} else {
+		if (nodeMap.containsKey(number)) {
+			NodeTimestamp nodeTimestamp = nodeMap.get(number);
+			nodeTimestamp.lastUsed = System.nanoTime();
+			nodePQ.increaseKey(nodeTimestamp);
+			return nodeTimestamp.node;
+		}
+		else {
+			BPNode<K,V> loadedNode = readNode(number);
+			NodeTimestamp nodeTimestamp = new NodeTimestamp(loadedNode, System.nanoTime());
+			nodeMap.put(loadedNode.number, nodeTimestamp);
+			nodePQ.add(nodeTimestamp);
+			// or return loadedNode?
+			return nodeTimestamp.node;
+		}
+		// NodeTimestamp nodeTimestamp = nodeMap.get(number);
+		// nodeTimestamp.lastUsed = System.nanoTime();
+
+		// boolean toFind = true;
+		// if (toFind) {
+		// 	returnNode = nodeMap.get(number);
+		// } else {
 			// long diskRead = number * DISK_SIZE;
 			// ByteBuffer nodeObj = ByteBuffer.allocate(DISK_SIZE);
 			// try {
@@ -188,11 +213,11 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 			// // TODO Auto-generated catch block
 			// e.printStackTrace();
 			// }
-			returnNode = readNode(number);
-		}
-		// check if in memory
-		// look in disk if not
-		// ByteBuffer looking = ByteBuffer.
-		return returnNode;
+		// 	returnNode = readNode(number);
+		// }
+		// // check if in memory
+		// // look in disk if not
+		// // ByteBuffer looking = ByteBuffer.
+		// return returnNode;
 	}
 }
