@@ -37,7 +37,7 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	private FileChannel relationChannel;
 
 	// TODO You should change the type of this nodeMap
-	private HashMap<Integer, BPNode<K, V>> nodeMap;
+	private HashMap<Integer, NodeTimestamp> nodeMap;
 	private DecentPQ<NodeTimestamp> nodePQ;
 
 	private class NodeTimestamp implements Comparable<NodeTimestamp> {
