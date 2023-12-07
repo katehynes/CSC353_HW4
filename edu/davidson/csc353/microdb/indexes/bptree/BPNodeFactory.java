@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.Function;
 
+import javax.tools.Diagnostic;
+
 import edu.davidson.csc353.microdb.files.Block;
 import edu.davidson.csc353.microdb.utils.DecentPQ;
 
@@ -122,6 +124,15 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 		// read in information from the ByteBuffer (im guessing into varables?)
 		// create a new node. "in memory"
 		// call the new node.load()
+		long diskRead = nodeNumber * DISK_SIZE;
+		ByteBuffer nodeObj = ByteBuffer.allocate(DISK_SIZE);
+		try {
+			relationChannel.read(nodeObj, diskRead);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		return null;
 	}
 
@@ -133,8 +144,13 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	private void writeNode(BPNode<K, V> node) {
 		ByteBuffer nodeSave = ByteBuffer.allocate(DISK_SIZE);
 		node.save(nodeSave);
-		// "write the buffer to its appropriate positionin the file", what file are we
-		// talking about?
+		long diskPos = node.number * DISK_SIZE;
+		try {
+			relationChannel.write(nodeSave, diskPos);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -159,9 +175,24 @@ public class BPNodeFactory<K extends Comparable<K>, V> {
 	 */
 	public BPNode<K, V> getNode(int number) {
 		// TODO
+		BPNode<K, V> returnNode;
+		boolean toFind = true;
+		if (toFind) {
+			returnNode = nodeMap.get(number);
+		} else {
+			// long diskRead = number * DISK_SIZE;
+			// ByteBuffer nodeObj = ByteBuffer.allocate(DISK_SIZE);
+			// try {
+			// relationChannel.read(nodeObj, diskRead);
+			// } catch (IOException e) {
+			// // TODO Auto-generated catch block
+			// e.printStackTrace();
+			// }
+			returnNode = readNode(number);
+		}
 		// check if in memory
 		// look in disk if not
 		// ByteBuffer looking = ByteBuffer.
-		return nodeMap.get(number);
+		return returnNode;
 	}
 }
