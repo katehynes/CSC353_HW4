@@ -310,7 +310,8 @@ public class BPNode<K extends Comparable<K>, V> {
 			}
 			this.next = buffer.getInt();
 		} else {
-			for (int i = 0; i < buffer.getInt(); i++) {
+			int numChildren = buffer.getInt();
+			for (int i = 0; i < numChildren; i++) {
 				this.children.add(buffer.getInt());
 			}
 		}
