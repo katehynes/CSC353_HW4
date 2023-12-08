@@ -192,11 +192,11 @@ public class BPTree<K extends Comparable<K>, V> {
 		ByteBuffer buffer1 = ByteBuffer.allocate(512);
 		ByteBuffer buffer2 = ByteBuffer.allocate(512);
 
-		// should we be changing the params for this too?
 		node1.save(buffer1);
 		node2.save(buffer2);
 
-		testIndex.nodeFactory.evictAll();
+		// For testing BPNodeFactory functions
+		// testIndex.nodeFactory.evictAll();
 
 		BPNode<String, Integer> newNode1 = new BPNode<>(false);
 		BPNode<String, Integer> newNode2 = new BPNode<>(true);
